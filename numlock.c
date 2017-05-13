@@ -1,30 +1,54 @@
 #include <windows.h>
+#include <string.h>
+#include<ctype.h>
 
-void SetNumLock(BOOL bState) {
+void SetKey(BOOL bState, unsigned int keyCode) {
   BYTE keyState[256];
+  INPUT input[2];
 
   GetKeyboardState((LPBYTE) & keyState);
-  if ((bState && !(keyState[VK_NUMLOCK] & 1)) ||
-    (!bState && (keyState[VK_NUMLOCK] & 1))) {
-    // Simulate a key press
-    keybd_event(VK_NUMLOCK,
-      0x45,
-      KEYEVENTF_EXTENDEDKEY | 0,
-      0);
+  if ((bState && !(keyState[keyCode] & 1)) ||
+    (!bState && (keyState[keyCode] & 1))) {
+    ZeroMemory(input, sizeof(input));
+    input[0].type = input[1].type = INPUT_KEYBOARD;
+    input[0].ki.wVk = input[1].ki.wVk = keyCode;
+    input[1].ki.dwFlags = KEYEVENTF_KEYUP;
 
-    // Simulate a key release
-    keybd_event(VK_NUMLOCK,
-      0x45,
-      KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP,
-      0);
+    // Simulate a key input
+    SendInput(2, input, sizeof(INPUT));
   }
 }
 
-int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
+//main entry
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
+  unsigned int keyCode;
+
+  //get self path
+  char selfName[MAX_PATH];
+  GetModuleFileName(NULL, selfName, MAX_PATH);
+
+  //get file name from path
+  const char * ptr = strrchr(selfName, '\\');
+  if (ptr != NULL)
+    strcpy(selfName, ptr + 1);
+
+  //convert file name to lower case
+  for (unsigned int i = 0; i < strlen(selfName); i++)
+    selfName[i] = tolower(selfName[i]);
+  //MessageBox(NULL, selfName, NULL, MB_OK|MB_ICONINFORMATION);
+
+  if (strstr(selfName, "num"))
+    keyCode = VK_NUMLOCK;
+  if (strstr(selfName, "caps") || strstr(selfName, "capital"))
+    keyCode = VK_CAPITAL;
+  if (strstr(selfName, "scro") || strstr(selfName, "scrl"))
+    keyCode = VK_SCROLL;
+
+  if (!keyCode) return 1;
   if (lstrlen(lpCmdLine) > 0) {
-    SetNumLock(FALSE);
+    SetKey(FALSE, keyCode);
   } else {
-    SetNumLock(TRUE);
+    SetKey(TRUE, keyCode);
   }
   return 0;
 }
