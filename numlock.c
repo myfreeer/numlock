@@ -21,7 +21,12 @@ void SetKey(BOOL bState, unsigned int keyCode) {
 
 //main entry
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
-  unsigned int keyCode;
+  BOOL bState;
+  if (lstrlen(lpCmdLine) > 0) {
+    bState = FALSE;
+  } else {
+    bState = TRUE;
+  }
 
   //get self path
   char selfName[MAX_PATH];
@@ -33,22 +38,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     strcpy(selfName, ptr + 1);
 
   //convert file name to lower case
-  for (unsigned int i = 0; i < strlen(selfName); i++)
+  for (unsigned int i = 0; i < lstrlen(selfName); i++)
     selfName[i] = tolower(selfName[i]);
   //MessageBox(NULL, selfName, NULL, MB_OK|MB_ICONINFORMATION);
 
   if (strstr(selfName, "num"))
-    keyCode = VK_NUMLOCK;
+    SetKey(bState, VK_NUMLOCK);
   if (strstr(selfName, "caps") || strstr(selfName, "capital"))
-    keyCode = VK_CAPITAL;
+    SetKey(bState, VK_CAPITAL);
   if (strstr(selfName, "scro") || strstr(selfName, "scrl"))
-    keyCode = VK_SCROLL;
+    SetKey(bState, VK_SCROLL);
 
-  if (!keyCode) return 1;
-  if (lstrlen(lpCmdLine) > 0) {
-    SetKey(FALSE, keyCode);
-  } else {
-    SetKey(TRUE, keyCode);
-  }
   return 0;
 }
