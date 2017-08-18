@@ -42,6 +42,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     selfName[i] = tolower(selfName[i]);
   //MessageBox(NULL, selfName, NULL, MB_OK|MB_ICONINFORMATION);
 
+  if (strstr(selfName, "off") || strstr(selfName, "un"))
+    bState = !bState;
   if (strstr(selfName, "num"))
     SetKey(bState, VK_NUMLOCK);
   if (strstr(selfName, "caps") || strstr(selfName, "capital"))
